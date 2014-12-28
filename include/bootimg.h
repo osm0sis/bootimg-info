@@ -47,7 +47,7 @@ struct boot_img_hdr
 
     unsigned char cmdline[BOOT_ARGS_SIZE];
 
-    unsigned id[8]; /* timestamp / checksum / sha1 / etc */
+    unsigned char id[8]; /* timestamp / checksum / sha1 / etc */
 
     /* Supplemental command line data; kept here to maintain
      * binary compatibility with older versions of mkbootimg */
