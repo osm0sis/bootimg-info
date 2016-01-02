@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     int i;
     for (i = 0; i <= 512; i++) {
         fseek(f, i, SEEK_SET);
-        fread(tmp, BOOT_MAGIC_SIZE, 1, f);
+        if(fread(tmp, BOOT_MAGIC_SIZE, 1, f)){};
         if (memcmp(tmp, BOOT_MAGIC, BOOT_MAGIC_SIZE) == 0)
             break;
     }
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
         return 1;
     }
     fseek(f, i, SEEK_SET);
-    fread(&header, sizeof(header), 1, f);
+    if(fread(&header, sizeof(header), 1, f)){};
     base = header.kernel_addr - 0x00008000;
     sprintf(id_sha, "%s", header.id);
     
