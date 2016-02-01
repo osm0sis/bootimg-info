@@ -46,13 +46,14 @@ int main(int argc, char** argv)
     
     boot_img_hdr header;
     int i;
-    for (i = 0; i <= 512; i++) {
+    int seeklimit = 4096;
+    for (i = 0; i <= seeklimit; i++) {
         fseek(f, i, SEEK_SET);
         if(fread(tmp, BOOT_MAGIC_SIZE, 1, f)){};
         if (memcmp(tmp, BOOT_MAGIC, BOOT_MAGIC_SIZE) == 0)
             break;
     }
-    if (i > 512) {
+    if (i > seeklimit) {
         printf("bootimg-info: Android boot magic not found!\n");
         return 1;
     }
