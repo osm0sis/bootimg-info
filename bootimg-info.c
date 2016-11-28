@@ -60,6 +60,19 @@ int main(int argc, char** argv)
     fseek(f, i, SEEK_SET);
     if(fread(&header, sizeof(header), 1, f)){};
     base = header.kernel_addr - 0x00008000;
+    int a,b,c,y,m;
+    if (header.os_version != 0) {
+        int os_version,os_patch_level;
+        os_version = header.os_version >> 11;
+        os_patch_level = header.os_version&0x7ff;
+        
+        a = (os_version >> 14)&0x7f;
+        b = (os_version >> 7)&0x7f;
+        c = os_version&0x7f;
+        
+        y = (os_patch_level >> 4) + 2000;
+        m = os_patch_level&0xf;
+    }
     sprintf(id_sha, "%s", header.id);
     
     printf(" Android Boot Image Info Utility\n\n");
@@ -79,7 +92,11 @@ int main(int argc, char** argv)
     printf("  tags_addr        : 0x%08x\n", header.tags_addr);
     printf("  page_size        : %d  \t  (%08x)\n", header.page_size, header.page_size);
     printf("  dt_size          : %d  \t  (%08x)\n", header.dt_size, header.dt_size);
-    printf("  unused           : %d  \t  (%08x)\n\n", header.unused, header.unused);
+    if ((a < 128) && (b < 128) && (c < 128) && (m > 0) && (m <= 12)) {
+        printf("  os_version       : %d.%d.%d\n", a, b, c);
+        printf("  os_patch_level   : %d-%02d\n\n", y, m);
+    } else
+        printf("  unused           : %d  \t  (%08x)\n\n", header.os_version, header.os_version);
     
     printf("  name             : %s\n", header.name);
     printf("  cmdline          : %s\n\n", header.cmdline);
