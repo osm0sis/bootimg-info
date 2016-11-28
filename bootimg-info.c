@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     char tmp[PATH_MAX];
     char* filename = NULL;
     int base = 0;
-    char id_sha[0];
+    char id_sha[32];
     
     argc--;
     if (argc > 0) {
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
         y = (os_patch_level >> 4) + 2000;
         m = os_patch_level&0xf;
     }
-    sprintf(id_sha, "%s", header.id);
+    sprintf(id_sha, "%s", (char *)header.id);
     
     printf(" Android Boot Image Info Utility\n\n");
     
