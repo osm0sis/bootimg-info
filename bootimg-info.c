@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     fseek(f, i, SEEK_SET);
     if(fread(&header, sizeof(header), 1, f)){};
     base = header.kernel_addr - 0x00008000;
-    int a,b,c,y,m;
+    int a,b,c,y,m = 0;
     if (header.os_version != 0) {
         int os_version,os_patch_level;
         os_version = header.os_version >> 11;
