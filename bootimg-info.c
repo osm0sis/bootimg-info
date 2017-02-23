@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     printf("  tags_addr        : 0x%08x\n", header.tags_addr);
     printf("  page_size        : %d  \t  (%08x)\n", header.page_size, header.page_size);
     printf("  dt_size          : %d  \t  (%08x)\n", header.dt_size, header.dt_size);
-    if ((a < 128) && (b < 128) && (c < 128) && (m > 0) && (m <= 12)) {
+    if ((a < 128) && (b < 128) && (c < 128) && (y >= 2000) && (y < 2128) && (m > 0) && (m <= 12)) {
         printf("  os_version       : %d.%d.%d\n", a, b, c);
         printf("  os_patch_level   : %d-%02d\n\n", y, m);
     } else
