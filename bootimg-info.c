@@ -16,9 +16,14 @@ int usage()
     return 0;
 }
 
-static char print_hash(const uint8_t *string)
+static char print_hash(const uint32_t *string)
 {
-    while (*string) printf("%02x", *string++);
+    int i;
+    while (*string) {
+        for (i = 0; i <= 24; i+=8)
+            printf("%02x", (uint8_t)(*string >> i));
+        *string++;
+    }
 }
 
 int main(int argc, char** argv)
@@ -26,7 +31,6 @@ int main(int argc, char** argv)
     char tmp[PATH_MAX];
     char* filename = NULL;
     int base = 0;
-    char id_sha[32];
     
     argc--;
     if (argc > 0) {
@@ -76,7 +80,6 @@ int main(int argc, char** argv)
         y = (os_patch_level >> 4) + 2000;
         m = os_patch_level&0xf;
     }
-    sprintf(id_sha, "%s", (char *)header.id);
     
     printf(" Android Boot Image Info Utility\n\n");
     
@@ -104,7 +107,7 @@ int main(int argc, char** argv)
     printf("  name             : %s\n", header.name);
     printf("  cmdline          : %s\n\n", header.cmdline);
     
-    printf("  id               : "); print_hash(id_sha); printf("\n\n");
+    printf("  id               : "); print_hash(header.id); printf("\n\n");
     
     printf("  extra_cmdline    : %s\n\n", header.extra_cmdline);
     
