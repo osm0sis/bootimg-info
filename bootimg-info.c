@@ -49,14 +49,11 @@ int main(int argc, char** argv)
     }
     
     boot_img_hdr header;
-    char* imgtype = "";
     int i;
-    int seeklimit = 65536;
+    int seeklimit = 20480;
     for (i = 0; i <= seeklimit; i++) {
         fseek(f, i, SEEK_SET);
         if(fread(tmp, BOOT_MAGIC_SIZE, 1, f)){};
-        if (memcmp(tmp, "CHROMEOS", BOOT_MAGIC_SIZE) == 0)
-            imgtype = "(CHROMEOS)";
         if (memcmp(tmp, BOOT_MAGIC, BOOT_MAGIC_SIZE) == 0)
             break;
     }
@@ -86,7 +83,7 @@ int main(int argc, char** argv)
     printf(" Printing information for \"%s\"\n\n", filename);
     
     printf(" Header:\n");
-    printf("  magic            : ANDROID! %s\n", imgtype);
+    printf("  magic            : ANDROID!\n");
     printf("  kernel_size      : %d  \t  (%08x)\n", header.kernel_size, header.kernel_size);
     printf("  kernel_addr      : 0x%08x\n\n", header.kernel_addr);
     
