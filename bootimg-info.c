@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     
     boot_img_hdr header;
     int i;
-    int seeklimit = 20480;
+    int seeklimit = 65536;
     for (i = 0; i <= seeklimit; i++) {
         fseek(f, i, SEEK_SET);
         if(fread(tmp, BOOT_MAGIC_SIZE, 1, f)){};
