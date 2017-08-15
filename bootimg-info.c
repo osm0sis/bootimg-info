@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     fseek(f, i, SEEK_SET);
     if(fread(&header, sizeof(header), 1, f)){};
     base = header.kernel_addr - 0x00008000;
-    int a,b,c,y,m = 0;
+    int a=0, b=0, c=0, y=0, m=0;
     if (header.os_version != 0) {
         int os_version,os_patch_level;
         os_version = header.os_version >> 11;
@@ -102,11 +102,11 @@ int main(int argc, char** argv)
         printf("  unused           : %d  \t  (%08x)\n\n", header.os_version, header.os_version);
     
     printf("  name             : %s\n", header.name);
-    printf("  cmdline          : %s\n\n", header.cmdline);
+    printf("  cmdline          : %.*s\n\n", BOOT_ARGS_SIZE, header.cmdline);
     
     printf("  id               : "); print_hash(header.id); printf("\n\n");
     
-    printf("  extra_cmdline    : %s\n\n", header.extra_cmdline);
+    printf("  extra_cmdline    : %.*s\n\n", BOOT_EXTRA_ARGS_SIZE, header.extra_cmdline);
     
     printf(" Other:\n");
     printf("  magic offset     : 0x%08x\n", i);
