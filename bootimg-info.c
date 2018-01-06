@@ -22,8 +22,9 @@ static char print_hash(const uint32_t *string)
     while (*string) {
         for (i = 0; i <= 24; i+=8)
             printf("%02x", (uint8_t)(*string >> i));
-        *string++;
+        if(*string++){};
     }
+    return 0;
 }
 
 int main(int argc, char** argv)
