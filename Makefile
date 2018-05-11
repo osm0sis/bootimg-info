@@ -25,7 +25,7 @@ endif
 all: bootimg-info$(EXE)
 
 static:
-	make LDFLAGS="$(LDFLAGS) -static"
+	$(MAKE) LDFLAGS="$(LDFLAGS) -static"
 
 bootimg-info$(EXE):bootimg-info.o
 	$(CROSS_COMPILE)$(CC) -o $@ $^ $(LDFLAGS)
