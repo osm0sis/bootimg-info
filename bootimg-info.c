@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <libgen.h>
+#include <inttypes.h>
 
 #include "include/sha.h"
 #include "include/bootimg.h"
@@ -117,7 +118,7 @@ int main(int argc, char** argv)
 
     if (header.header_version > 0 && header.header_version <= hdr_ver_max) {
         printf("  recovery_dtbo_size    : %-10d  (%08x)\n", header.recovery_dtbo_size, header.recovery_dtbo_size);
-        printf("  recovery_dtbo_offset  : 0x%08x\n", header.recovery_dtbo_offset);
+        printf("  recovery_dtbo_offset  : %-10"PRId64"  (%016"PRIx64")\n", header.recovery_dtbo_offset, header.recovery_dtbo_offset);
         printf("  header_size           : %-10d  (%08x)\n\n", header.header_size, header.header_size);
     }
 
