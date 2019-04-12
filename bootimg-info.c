@@ -50,7 +50,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    boot_img_hdr_v1 header;
+    boot_img_hdr_v2 header;
     int i;
     int seeklimit = 65536;
     for (i = 0; i <= seeklimit; i++) {
@@ -109,17 +109,24 @@ int main(int argc, char** argv)
         printf("  unused                : %-10d  (%08x)\n\n", header.os_version, header.os_version);
     }
 
-    printf("  name                  : %s\n", header.name);
+    printf("  name                  : %s\n\n", header.name);
+
     printf("  cmdline               : %.*s\n\n", BOOT_ARGS_SIZE, header.cmdline);
 
     printf("  id                    : "); print_hash(header.id); printf("\n\n");
 
     printf("  extra_cmdline         : %.*s\n\n", BOOT_EXTRA_ARGS_SIZE, header.extra_cmdline);
 
-    if (header.header_version > 0 && header.header_version <= hdr_ver_max) {
-        printf("  recovery_dtbo_size    : %-10d  (%08x)\n", header.recovery_dtbo_size, header.recovery_dtbo_size);
-        printf("  recovery_dtbo_offset  : %-10"PRId64"  (%016"PRIx64")\n", header.recovery_dtbo_offset, header.recovery_dtbo_offset);
-        printf("  header_size           : %-10d  (%08x)\n\n", header.header_size, header.header_size);
+    if (header.header_version <= hdr_ver_max) {
+        if (header.header_version > 0) {
+            printf("  recovery_dtbo_size    : %-10d  (%08x)\n", header.recovery_dtbo_size, header.recovery_dtbo_size);
+            printf("  recovery_dtbo_offset  : %-10"PRId64"  (%016"PRIx64")\n", header.recovery_dtbo_offset, header.recovery_dtbo_offset);
+            printf("  header_size           : %-10d  (%08x)\n\n", header.header_size, header.header_size);
+        }
+        if (header.header_version > 1) {
+            printf("  dtb_size              : %-10d  (%08x)\n", header.dtb_size, header.dtb_size);
+            printf("  dtb_addr              : %-10"PRId64"  (%016"PRIx64")\n\n", header.dtb_addr, header.dtb_addr);
+        }
     }
 
     printf(" Other:\n");
@@ -130,6 +137,9 @@ int main(int argc, char** argv)
     printf("  ramdisk offset        : 0x%08x\n", header.ramdisk_addr - base);
     printf("  second offset         : 0x%08x\n", header.second_addr - base);
     printf("  tags offset           : 0x%08x\n", header.tags_addr - base);
+    if (header.header_version <= hdr_ver_max && header.header_version > 1) {
+        printf("  dtb offset            : 0x%08x\n", header.dtb_addr - base);
+    }
 
     fclose(f);
 
