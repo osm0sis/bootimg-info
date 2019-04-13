@@ -125,7 +125,7 @@ int main(int argc, char** argv)
         }
         if (header.header_version > 1) {
             printf("  dtb_size              : %-10d  (%08x)\n", header.dtb_size, header.dtb_size);
-            printf("  dtb_addr              : %-10"PRId64"  (%016"PRIx64")\n\n", header.dtb_addr, header.dtb_addr);
+            printf("  dtb_addr              : 0x%08"PRIx64"  (%016"PRIx64")\n\n", header.dtb_addr, header.dtb_addr);
         }
     }
 
