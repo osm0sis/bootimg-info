@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     printf("  second offset         : 0x%08x\n", header.second_addr - base);
     printf("  tags offset           : 0x%08x\n", header.tags_addr - base);
     if (header.header_version <= hdr_ver_max && header.header_version > 1) {
-        printf("  dtb offset            : 0x%08x\n", header.dtb_addr - base);
+        printf("  dtb offset            : 0x%08"PRIx64"\n", header.dtb_addr - base);
     }
 
     fclose(f);
