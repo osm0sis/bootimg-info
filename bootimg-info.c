@@ -1,15 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <limits.h>
-#include <libgen.h>
 #include <inttypes.h>
 
-#include "include/sha.h"
-#include "include/bootimg.h"
+#include "bootimg.h"
 
 int usage()
 {
@@ -30,7 +23,7 @@ static char print_hash(const uint32_t *string)
 
 int main(int argc, char** argv)
 {
-    char tmp[PATH_MAX];
+    char tmp[BOOT_MAGIC_SIZE];
     char* filename = NULL;
     int base = 0;
 
