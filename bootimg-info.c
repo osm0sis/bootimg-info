@@ -10,14 +10,14 @@ int usage()
     return 0;
 }
 
-static char print_hash(const uint32_t *string)
+static char print_hash(boot_img_hdr_v2 *hdr)
 {
+    int SHA256_DIGEST_SIZE = 32;
+    uint8_t id[SHA256_DIGEST_SIZE];
+    memcpy(&id, hdr->id, sizeof(id));
     int i;
-    while (*string) {
-        for (i = 0; i <= 24; i+=8)
-            printf("%02x", (uint8_t)(*string >> i));
-        if(*string++){};
-    }
+    for (i = 0; i < SHA256_DIGEST_SIZE; ++i)
+        printf("%02hhx", id[i]);
     return 0;
 }
 
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
     printf("  cmdline               : %.*s\n\n", BOOT_ARGS_SIZE, header.cmdline);
 
-    printf("  id                    : "); print_hash(header.id); printf("\n\n");
+    printf("  id                    : "); print_hash(&header); printf("\n\n");
 
     printf("  extra_cmdline         : %.*s\n\n", BOOT_EXTRA_ARGS_SIZE, header.extra_cmdline);
 
