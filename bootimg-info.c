@@ -11,16 +11,40 @@ int usage()
     return 0;
 }
 
-static char print_hash(boot_img_hdr_v2 *hdr)
+void print_os_version(uint32_t hdr_os_ver)
+{
+    int a = 0, b = 0, c = 0, y = 0, m = 0;
+    if (hdr_os_ver != 0) {
+        int os_version = 0, os_patch_level = 0;
+        os_version = hdr_os_ver >> 11;
+        os_patch_level = hdr_os_ver&0x7ff;
+
+        a = (os_version >> 14)&0x7f;
+        b = (os_version >> 7)&0x7f;
+        c = os_version&0x7f;
+
+        y = (os_patch_level >> 4) + 2000;
+        m = os_patch_level&0xf;
+    }
+    if ((a < 128) && (b < 128) && (c < 128) && (y >= 2000) && (y < 2128) && (m > 0) && (m <= 12)) {
+        printf("  os_version            : %d.%d.%-5d  (%08x)\n", a, b, c, hdr_os_ver);
+        printf("  os_patch_level        : %d-%02d\n", y, m);
+    } else {
+        printf("  unused                : %-10d  (%08x)\n", hdr_os_ver, hdr_os_ver);
+    }
+}
+
+void print_id(boot_img_hdr_v2 *hdr)
 {
     int SHA256_DIGEST_SIZE = 32;
     uint8_t id[SHA256_DIGEST_SIZE];
     memcpy(&id, hdr->id, sizeof(id));
+    printf("  id                    : ");
     int i;
     for (i = 0; i < SHA256_DIGEST_SIZE; ++i) {
         printf("%02hhx", id[i]);
     }
-    return 0;
+    printf("\n\n");
 }
 
 int main(int argc, char** argv)
@@ -77,26 +101,13 @@ int main(int argc, char** argv)
 
     if (vndrboot == false) {
         if ((header.header_version < 3) || (header.header_version > hdr_ver_max)) {
-            // boot_img_hdr_v2 in the modified header supports all boot_img_hdr versions and variants below 3
+            // boot_img_hdr_v2 in the backported header supports all boot_img_hdr versions and cross-compatible variants below 3
+
             fseek(f, i, SEEK_SET);
             boot_img_hdr_v2 header;
             if(fread(&header, sizeof(header), 1, f)){};
 
             base = header.kernel_addr - 0x00008000;
-
-            int a = 0, b = 0, c = 0, y = 0, m = 0;
-            if (header.os_version != 0) {
-                int os_version,os_patch_level;
-                os_version = header.os_version >> 11;
-                os_patch_level = header.os_version&0x7ff;
-
-                a = (os_version >> 14)&0x7f;
-                b = (os_version >> 7)&0x7f;
-                c = os_version&0x7f;
-
-                y = (os_patch_level >> 4) + 2000;
-                m = os_patch_level&0xf;
-            }
 
             printf("  magic                 : ANDROID!\n");
             printf("  kernel_size           : %-10d  (%08x)\n", header.kernel_size, header.kernel_size);
@@ -114,18 +125,13 @@ int main(int argc, char** argv)
             } else {
                 printf("  header_version        : %-10d  (%08x)\n", header.header_version, header.header_version);
             }
-            if ((a < 128) && (b < 128) && (c < 128) && (y >= 2000) && (y < 2128) && (m > 0) && (m <= 12)) {
-                printf("  os_version            : %d.%d.%d\n", a, b, c);
-                printf("  os_patch_level        : %d-%02d\n\n", y, m);
-            } else {
-                printf("  unused                : %-10d  (%08x)\n\n", header.os_version, header.os_version);
-            }
+            print_os_version(header.os_version); printf("\n");
 
             printf("  name                  : %s\n\n", header.name);
 
             printf("  cmdline               : %.*s\n\n", BOOT_ARGS_SIZE, header.cmdline);
 
-            printf("  id                    : "); print_hash(&header); printf("\n\n");
+            print_id(&header);
 
             printf("  extra_cmdline         : %.*s\n\n", BOOT_EXTRA_ARGS_SIZE, header.extra_cmdline);
 
@@ -154,26 +160,12 @@ int main(int argc, char** argv)
             }
         } else {
             // boot_img_hdr_v3 and above are no longer backwards compatible
-            int a = 0, b = 0, c = 0, y = 0, m = 0;
-            int os_version,os_patch_level;
-            os_version = header.os_version >> 11;
-            os_patch_level = header.os_version&0x7ff;
-
-            a = (os_version >> 14)&0x7f;
-            b = (os_version >> 7)&0x7f;
-            c = os_version&0x7f;
-
-            y = (os_patch_level >> 4) + 2000;
-            m = os_patch_level&0xf;
 
             printf("  magic                 : ANDROID!\n");
             printf("  kernel_size           : %-10d  (%08x)\n", header.kernel_size, header.kernel_size);
             printf("  ramdisk_size          : %-10d  (%08x)\n\n", header.ramdisk_size, header.ramdisk_size);
 
-            if ((a < 128) && (b < 128) && (c < 128) && (y >= 2000) && (y < 2128) && (m > 0) && (m <= 12)) {
-                printf("  os_version            : %d.%d.%d\n", a, b, c);
-                printf("  os_patch_level        : %d-%02d\n", y, m);
-            }
+            print_os_version(header.os_version);
             printf("  header_size           : %-10d  (%08x)\n", header.header_size, header.header_size);
             printf("  reserved[1]           : %-10d  (%08x)\n", header.reserved[0], header.reserved[0]);
             printf("  reserved[2]           : %-10d  (%08x)\n\n", header.reserved[1], header.reserved[1]);
@@ -188,6 +180,7 @@ int main(int argc, char** argv)
         }
     } else {
         // vendor_boot_img_hdr started at v3 and is not cross-compatible with boot_img_hdr
+
         fseek(f, i, SEEK_SET);
         vendor_boot_img_hdr_v3 header;
         if(fread(&header, sizeof(header), 1, f)){};
