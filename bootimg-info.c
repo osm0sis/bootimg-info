@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 #include <string.h>
 #include <inttypes.h>
 
@@ -8,7 +7,7 @@
 int usage()
 {
     printf("usage: bootimg-info boot.img\n");
-    return 0;
+    return 1;
 }
 
 void print_os_version(uint32_t hdr_os_ver)
@@ -61,11 +60,11 @@ int main(int argc, char** argv)
     FILE* f = fopen(filename, "rb");
     if (!f) {
         printf("bootimg-info: File not found!\n");
-        return 0;
+        return 1;
     }
 
     char tmp[BOOT_MAGIC_SIZE];
-    bool vndrboot = false;
+    char *magic = NULL;
 
     int i;
     int seeklimit = 65536; // arbitrary byte limit to search in input file for boot image magic
@@ -73,10 +72,11 @@ int main(int argc, char** argv)
         fseek(f, i, SEEK_SET);
         if(fread(tmp, BOOT_MAGIC_SIZE, 1, f)){};
         if (memcmp(tmp, BOOT_MAGIC, BOOT_MAGIC_SIZE) == 0) {
+            magic = BOOT_MAGIC;
             break;
         }
         if (memcmp(tmp, VENDOR_BOOT_MAGIC, VENDOR_BOOT_MAGIC_SIZE) == 0) {
-            vndrboot = true;
+            magic = VENDOR_BOOT_MAGIC;
             break;
         }
     }
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
     int base = 0;
 
-    if (vndrboot == false) {
+    if (magic == BOOT_MAGIC) {
         if ((header.header_version < 3) || (header.header_version > hdr_ver_max)) {
             // boot_img_hdr_v2 in the backported header supports all boot_img_hdr versions and cross-compatible variants below 3
 
