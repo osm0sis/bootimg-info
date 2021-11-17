@@ -33,6 +33,9 @@ bootimg-info$(EXE):bootimg-info.o
 bootimg-info.o:bootimg-info.c
 	$(CROSS_COMPILE)$(CC) -o $@ $(CFLAGS) -c $< -Werror
 
+install:
+	install -m 755 bootimg-info $(PREFIX)/bin
+
 clean:
 	$(RM) bootimg-info
 	$(RM) *.a *.~ *.exe *.o
