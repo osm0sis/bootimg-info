@@ -48,6 +48,7 @@ typedef struct boot_img_hdr_v3 boot_img_hdr_v3;
 typedef struct boot_img_hdr_v4 boot_img_hdr_v4;
 typedef struct vendor_boot_img_hdr_v3 vendor_boot_img_hdr_v3;
 typedef struct vendor_boot_img_hdr_v4 vendor_boot_img_hdr_v4;
+typedef struct vendor_ramdisk_table_entry_v4 vendor_ramdisk_table_entry_v4;
 
 /* When a boot header is of version 0, the structure of boot image is as
  * follows:

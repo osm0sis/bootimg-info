@@ -48,7 +48,7 @@ void print_id(boot_img_hdr_v2 *hdr)
 
 int main(int argc, char** argv)
 {
-    char* filename = NULL;
+    char *filename = NULL;
     argc--;
     if (argc > 0) {
         char *val = argv[1];
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     if (filename == NULL) {
         return usage();
     }
-    FILE* f = fopen(filename, "rb");
+    FILE *f = fopen(filename, "rb");
     if (!f) {
         printf("bootimg-info: File not found!\n");
         return 1;
@@ -87,9 +87,9 @@ int main(int argc, char** argv)
 
     printf(" Android Boot Image Info Utility\n\n");
 
-    printf(" Printing information for \"%s\"\n\n", filename);
+    printf(" Printing information for \"%s\":\n\n", filename);
 
-    printf(" Header:\n");
+    printf(" header:\n");
 
     boot_img_hdr_v4 header;
     fseek(f, i, SEEK_SET);
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
             }
 
             printf(" Other:\n");
-            printf("  magic offset                    : 0x%08x\n", i);
+            printf("  magic offset                    : %-10d  (%08x)\n\n", i, i);
             printf("  base address                    : 0x%08x\n\n", base);
 
             printf("  kernel offset                   : 0x%08x\n", header.kernel_addr - base);
@@ -158,6 +158,7 @@ int main(int argc, char** argv)
             if (header.header_version <= hdr_ver_max && header.header_version > 1) {
                 printf("  dtb offset                      : 0x%08"PRIx64"\n", header.dtb_addr - base);
             }
+
         } else {
             // boot_img_hdr_v3 and above are no longer backwards compatible
 
@@ -175,20 +176,34 @@ int main(int argc, char** argv)
             printf("  header_version                  : %-10d  (%08x)\n", header.header_version, header.header_version);
             printf("  cmdline                         : %.*s\n", BOOT_ARGS_SIZE+BOOT_EXTRA_ARGS_SIZE, header.cmdline);
             if (header.header_version > 3) {
-                printf("  signature_size                  : %-10d  (%08x)\n\n", header.signature_size, header.signature_size);
-            } else {
-                printf("\n");
+                printf("  signature_size                  : %-10d  (%08x)\n", header.signature_size, header.signature_size);
             }
+            printf("\n");
 
             printf(" Other:\n");
-            printf("  magic offset                    : 0x%08x\n", i);
+            printf("  magic offset                    : %-10d  (%08x)\n", i, i);
         }
+
     } else {
         // vendor_boot_img_hdr started at v3 and is not cross-compatible with boot_img_hdr
 
         fseek(f, i, SEEK_SET);
         vendor_boot_img_hdr_v4 header;
         if(fread(&header, sizeof(header), 1, f)){};
+
+        vendor_ramdisk_table_entry_v4 rdt_entry;
+        int rdt_offset;
+        int bc_offset;
+        if (header.header_version > 3) {
+            rdt_offset = ((header.header_size + header.page_size - 1) / header.page_size
+                + (header.vendor_ramdisk_size + header.page_size - 1) / header.page_size
+                + (header.dtb_size + header.page_size - 1) / header.page_size) * header.page_size;
+
+            bc_offset = ((header.header_size + header.page_size - 1) / header.page_size
+                + (header.vendor_ramdisk_size + header.page_size - 1) / header.page_size
+                + (header.dtb_size + header.page_size - 1) / header.page_size
+                + (header.vendor_ramdisk_table_size + header.page_size - 1) / header.page_size) * header.page_size;
+        }
 
         base = header.kernel_addr - 0x00008000;
 
@@ -213,19 +228,60 @@ int main(int argc, char** argv)
             printf("  vendor_ramdisk_table_entry_num  : %-10d  (%08x)\n", header.vendor_ramdisk_table_entry_num, header.vendor_ramdisk_table_entry_num);
             printf("  vendor_ramdisk_table_entry_size : %-10d  (%08x)\n", header.vendor_ramdisk_table_entry_size, header.vendor_ramdisk_table_entry_size);
             printf("  bootconfig_size                 : %-10d  (%08x)\n\n", header.bootconfig_size, header.bootconfig_size);
+
+            fseek(f, rdt_offset, SEEK_SET);
+            int rdt_entry_num;
+            for (rdt_entry_num = 1; rdt_entry_num <= header.vendor_ramdisk_table_entry_num; rdt_entry_num++) {
+                if(fread(&rdt_entry, header.vendor_ramdisk_table_entry_size, 1, f)){};
+                char *rdt_type_name;
+                switch (rdt_entry.ramdisk_type) {
+                    case 0:
+                        rdt_type_name = "NONE";
+                        break;
+                    case 1:
+                        rdt_type_name = "PLATFORM";
+                        break;
+                    case 2:
+                        rdt_type_name = "RECOVERY";
+                        break;
+                    case 3:
+                        rdt_type_name = "DLKM";
+                }
+
+                printf(" vendor_ramdisk_table_entry: %d\n", rdt_entry_num);
+                printf("  ramdisk_size                    : %-10d  (%08x)\n", rdt_entry.ramdisk_size, rdt_entry.ramdisk_size);
+                printf("  ramdisk_offset                  : %-10d  (%08x)\n", rdt_entry.ramdisk_offset, rdt_entry.ramdisk_offset);
+                printf("  ramdisk_type                    : %-10d  (%08x): %s\n", rdt_entry.ramdisk_type, rdt_entry.ramdisk_type, rdt_type_name);
+                printf("  ramdisk_name                    : %s\n\n", rdt_entry.ramdisk_name);
+
+                printf("  board_id                        : %ls\n\n", rdt_entry.board_id);
+            }
+
+            fseek(f, bc_offset, SEEK_SET);
+            char bootconfig[header.bootconfig_size];
+            if(fread(bootconfig, header.bootconfig_size, 1, f)){};
+
+            printf(" bootconfig: %.*s\n", header.bootconfig_size, bootconfig);
         }
 
         printf(" Other:\n");
-        printf("  magic offset                    : 0x%08x\n", i);
+        printf("  magic offset                    : %-10d  (%08x)\n\n", i, i);
+
         printf("  base address                    : 0x%08x\n\n", base);
 
         printf("  kernel offset                   : 0x%08x\n", header.kernel_addr - base);
         printf("  ramdisk offset                  : 0x%08x\n", header.ramdisk_addr - base);
         printf("  tags offset                     : 0x%08x\n", header.tags_addr - base);
         printf("  dtb offset                      : 0x%08"PRIx64"\n", header.dtb_addr - base);
+        if (header.header_version > 3) {
+            printf("\n");
+
+            printf("  vendor ramdisk table offset     : %-10d  (%08x)\n", rdt_offset, rdt_offset);
+            printf("  bootconfig offset               : %-10d  (%08x)\n", bc_offset, bc_offset);
+        }
     }
 
+    printf("\n");
     fclose(f);
-
     return 0;
 }
