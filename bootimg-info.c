@@ -230,8 +230,8 @@ int main(int argc, char** argv)
             printf("  bootconfig_size                 : %-10d  (%08x)\n\n", header.bootconfig_size, header.bootconfig_size);
 
             fseek(f, rdt_offset, SEEK_SET);
-            int rdt_entry_num;
-            for (rdt_entry_num = 1; rdt_entry_num <= header.vendor_ramdisk_table_entry_num; rdt_entry_num++) {
+            int rdt_entry_cur;
+            for (rdt_entry_cur = 1; rdt_entry_cur <= header.vendor_ramdisk_table_entry_num; rdt_entry_cur++) {
                 if(fread(&rdt_entry, header.vendor_ramdisk_table_entry_size, 1, f)){};
                 char *rdt_type_name;
                 switch (rdt_entry.ramdisk_type) {
@@ -248,7 +248,7 @@ int main(int argc, char** argv)
                         rdt_type_name = "DLKM";
                 }
 
-                printf(" vendor_ramdisk_table_entry: %d\n", rdt_entry_num);
+                printf(" vendor_ramdisk_table_entry: %d\n", rdt_entry_cur);
                 printf("  ramdisk_size                    : %-10d  (%08x)\n", rdt_entry.ramdisk_size, rdt_entry.ramdisk_size);
                 printf("  ramdisk_offset                  : %-10d  (%08x)\n", rdt_entry.ramdisk_offset, rdt_entry.ramdisk_offset);
                 printf("  ramdisk_type                    : %-10d  (%08x): %s\n", rdt_entry.ramdisk_type, rdt_entry.ramdisk_type, rdt_type_name);
