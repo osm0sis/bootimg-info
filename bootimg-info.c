@@ -246,6 +246,7 @@ int main(int argc, char** argv)
                         break;
                     case 3:
                         rdt_type_name = "DLKM";
+                        break;
                 }
 
                 printf(" vendor_ramdisk_table_entry: %d\n", rdt_entry_cur);
